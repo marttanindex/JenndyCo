@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenndy Co. | Interactive Brand Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+
+        :root {
+            --color-stone-50: #fafaf9;
+            --color-stone-100: #f5f5f4;
+            --color-stone-800: #292524;
+            --color-stone-900: #1c1917;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--color-stone-50);
+            color: var(--color-stone-800);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Chart Container Styling Rules */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Max width constraint */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Scrollbar for Catalog */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 3px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #a8a29e;
+        }
+
+        /* Navigation Active State */
+        .nav-btn.active {
+            border-bottom: 2px solid var(--color-stone-900);
+            font-weight: 700;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone) with Black Accents for Elegance -->
+    <!-- Application Structure Plan: 
+         The app is structured as a Single Page Application (SPA) with three main views: 
+         1. 'Overview': A dashboard combining brand ethos with quantitative visualizations (Chart.js) of customer satisfaction and sustainability, satisfying the 'Report' aspect.
+         2. 'Collections': An interactive catalog with JS-based filtering and sorting to explore the product data.
+         3. 'Inquiry': A functional contact section.
+         Navigation is handled via a sticky top bar interacting with a central state object in JS.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Goal: Inform about Brand Quality -> Viz: Doughnut Chart of Rating Distribution -> Interaction: Tooltip hover -> Justification: Quickly conveys trust/quality.
+         2. Goal: Inform about Sustainability -> Viz: Bar Chart of Materials Used -> Interaction: Hover for details -> Justification: Highlights the 'Eco-friendly' aspect mentioned in source.
+         3. Goal: Organize Products -> Viz: Interactive CSS Grid -> Interaction: Category Filter Buttons -> Justification: Best way to browse 'Clothing', 'Accessories', 'Beauty'.
+         4. Goal: Connect -> Viz: Direct Action Buttons -> Interaction: Click to Mail/Message -> Justification: User requested simple inquiry methods.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. Unicode icons employed. -->
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Brand -->
+                <div class="flex-shrink-0 cursor-pointer" onclick="app.navigate('overview')">
+                    <h1 class="text-2xl font-bold tracking-tighter text-stone-900">
+                        Jenndy<span class="text-stone-400">Co.</span>
+                    </h1>
+                </div>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="app.navigate('overview')" id="nav-overview" class="nav-btn text-stone-600 hover:text-stone-900 px-1 py-2 text-sm font-medium transition-colors">Overview</button>
+                    <button onclick="app.navigate('collections')" id="nav-collections" class="nav-btn text-stone-600 hover:text-stone-900 px-1 py-2 text-sm font-medium transition-colors">Collections</button>
+                    <button onclick="app.navigate('inquiry')" id="nav-inquiry" class="nav-btn text-stone-600 hover:text-stone-900 px-1 py-2 text-sm font-medium transition-colors">Inquire</button>
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <div class="md:hidden">
+                    <button onclick="app.toggleMobileMenu()" class="text-2xl text-stone-600 focus:outline-none">
+                        &#9776; <!-- Unicode Hamburger -->
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Nav Panel -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-stone-100">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="app.navigate('overview')" class="block w-full text-left px-3 py-2 text-base font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-900">Overview</button>
+                <button onclick="app.navigate('collections')" class="block w-full text-left px-3 py-2 text-base font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-900">Collections</button>
+                <button onclick="app.navigate('inquiry')" class="block w-full text-left px-3 py-2 text-base font-medium text-stone-700 hover:bg-stone-50 hover:text-stone-900">Inquire</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="app-container" class="flex-grow">
+        <!-- Views will be injected here by JS -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-900 text-stone-400 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="mb-2 font-serif text-white text-lg">Jenndy Co.</p>
+            <p class="text-sm">&copy; 2024. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Data Source ---
+        const brandData = {
+            products: [
+                { id: 1, name: 'Silk Midi Dress', category: 'Clothing', price: 129.00, rating: 4.8, image: 'https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=600' },
+                { id: 2, name: 'Oversized Linen Blazer', category: 'Clothing', price: 185.00, rating: 4.9, image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&q=80&w=600' },
+                { id: 3, name: 'Cashmere Knit Sweater', category: 'Clothing', price: 150.00, rating: 4.7, image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&q=80&w=600' },
+                { id: 4, name: 'High-Waist Trousers', category: 'Clothing', price: 95.00, rating: 4.6, image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&q=80&w=600' },
+                { id: 5, name: 'Gold Link Chain', category: 'Accessories', price: 45.00, rating: 4.5, image: 'https://images.unsplash.com/photo-1599643478518-17488fbbcd75?auto=format&fit=crop&q=80&w=600' },
+                { id: 6, name: 'Leather Tote Bag', category: 'Accessories', price: 210.00, rating: 4.9, image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&q=80&w=600' },
+                { id: 7, name: 'Hydrating Serum', category: 'Beauty', price: 55.00, rating: 4.9, image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=600' },
+                { id: 8, name: 'Matte Lipstick', category: 'Beauty', price: 28.00, rating: 4.7, image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&q=80&w=600' },
+                { id: 9, name: 'Clay Face Mask', category: 'Beauty', price: 32.00, rating: 4.6, image: 'https://images.unsplash.com/photo-1596462502278-27bfdd403348?auto=format&fit=crop&q=80&w=600' },
+            ],
+            stats: {
+                satisfaction: [15, 30, 55], // Neutral, Good, Excellent
+                materials: [40, 35, 25] // Cotton, Silk, Recycled
+            }
+        };
+
+        // --- Application Logic ---
+        const app = {
+            state: {
+                currentView: 'overview',
+                filterCategory: 'All'
+            },
+            
+            init: function() {
+                this.navigate('overview');
+            },
+
+            toggleMobileMenu: function() {
+                const menu = document.getElementById('mobile-menu');
+                menu.classList.toggle('hidden');
+            },
+
+            navigate: function(viewId) {
+                this.state.currentView = viewId;
+                
+                // Update Nav UI
+                document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+                const activeBtn = document.getElementById(`nav-${viewId}`);
+                if(activeBtn) activeBtn.classList.add('active');
+                
+                // Hide Mobile Menu if open
+                document.getElementById('mobile-menu').classList.add('hidden');
+
+                // Render Content
+                const container = document.getElementById('app-container');
+                container.innerHTML = ''; // Clear current
+
+                if (viewId === 'overview') this.renderOverview(container);
+                if (viewId === 'collections') this.renderCollections(container);
+                if (viewId === 'inquiry') this.renderInquiry(container);
+            },
+
+            // --- VIEW: Overview (Dashboard) ---
+            renderOverview: function(container) {
+                const html = `
+                    <!-- Hero Section -->
+                    <section class="relative bg-stone-900 h-[50vh] flex items-center justify-center overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=1600" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-40">
+                        <div class="relative text-center px-4 max-w-4xl">
+                            <h2 class="text-4xl md:text-6xl text-white font-bold mb-4 animate-fade-in-up">Effortless Elegance</h2>
+                            <p class="text-lg text-stone-200 mb-8 max-w-xl mx-auto">Curated collections for the modern lifestyle. Explore our data-driven approach to quality and style.</p>
+                            <button onclick="app.navigate('collections')" class="px-8 py-3 bg-white text-stone-900 font-bold uppercase tracking-wider text-sm hover:bg-stone-100 transition">Browse Catalog</button>
+                        </div>
+                    </section>
+
+                    <!-- Introductory Text -->
+                    <section class="max-w-7xl mx-auto px-4 py-16 text-center">
+                        <h3 class="text-2xl font-serif font-bold text-stone-900 mb-4">Our Commitment to Quality</h3>
+                        <p class="text-stone-600 max-w-2xl mx-auto leading-relaxed">
+                            At Jenndy Co., we don't just sell products; we curate experiences. 
+                            Below, explore the data behind our brand—from our customer satisfaction metrics to our sustainable material usage. 
+                            This transparency reflects our dedication to the "Source Report" of our business: Truth and Beauty.
+                        </p>
+                    </section>
+
+                    <!-- Interactive Charts Section -->
+                    <section class="bg-white py-16 border-t border-stone-100">
+                        <div class="max-w-7xl mx-auto px-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                                <!-- Chart 1: Satisfaction -->
+                                <div>
+                                    <div class="mb-6 text-center md:text-left">
+                                        <h4 class="text-xl font-bold text-stone-900">Customer Satisfaction</h4>
+                                        <p class="text-sm text-stone-500 mt-1">Based on 5,000+ verified reviews.</p>
+                                    </div>
+                                    <div class="chart-container bg-stone-50 rounded-lg p-4 border border-stone-100 shadow-sm">
+                                        <canvas id="satisfactionChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <!-- Chart 2: Sustainability -->
+                                <div>
+                                    <div class="mb-6 text-center md:text-left">
+                                        <h4 class="text-xl font-bold text-stone-900">Sustainable Materials</h4>
+                                        <p class="text-sm text-stone-500 mt-1">Breakdown of our 2024 production sources.</p>
+                                    </div>
+                                    <div class="chart-container bg-stone-50 rounded-lg p-4 border border-stone-100 shadow-sm">
+                                        <canvas id="materialsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                `;
+                container.innerHTML = html;
+                this.initCharts();
+            },
+
+            // --- VIEW: Collections (Catalog) ---
+            renderCollections: function(container) {
+                // Intro text for context
+                const headerHtml = `
+                    <section class="bg-stone-100 py-12">
+                        <div class="max-w-7xl mx-auto px-4 text-center">
+                            <h2 class="text-3xl font-serif font-bold mb-4">The Collection</h2>
+                            <p class="text-stone-600 max-w-2xl mx-auto">
+                                Browse our complete inventory. Use the interactive filters below to sort by category. 
+                                Each item is hand-selected to meet our rigorous standards for aesthetic and durability.
+                            </p>
+                        </div>
+                    </section>
+                `;
+
+                // Filter Controls
+                const controlsHtml = `
+                    <div class="max-w-7xl mx-auto px-4 py-8 sticky top-16 bg-white/95 backdrop-blur z-30 border-b border-stone-100">
+                        <div class="flex flex-wrap justify-center gap-4">
+                            ${['All', 'Clothing', 'Accessories', 'Beauty'].map(cat => `
+                                <button onclick="app.filterProducts('${cat}')" 
+                                    class="filter-btn px-6 py-2 rounded-full border border-stone-200 text-sm font-medium transition-all ${this.state.filterCategory === cat ? 'bg-stone-900 text-white' : 'bg-white text-stone-600 hover:bg-stone-50'}">
+                                    ${cat}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                // Grid
+                const products = this.state.filterCategory === 'All' 
+                    ? brandData.products 
+                    : brandData.products.filter(p => p.category === this.state.filterCategory);
+
+                const gridHtml = `
+                    <div class="max-w-7xl mx-auto px-4 py-8 pb-20">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                            ${products.map(product => `
+                                <div class="group bg-white rounded-lg overflow-hidden border border-stone-100 hover:shadow-lg transition-shadow duration-300">
+                                    <div class="aspect-[3/4] overflow-hidden bg-stone-200 relative">
+                                        <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                        <div class="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold text-stone-900">
+                                            &#9733; ${product.rating}
+                                        </div>
+                                    </div>
+                                    <div class="p-5">
+                                        <div class="text-xs text-stone-500 uppercase tracking-wide mb-1">${product.category}</div>
+                                        <h3 class="text-lg font-bold text-stone-900 mb-2">${product.name}</h3>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-stone-900 font-medium">$${product.price.toFixed(2)}</span>
+                                            <button onclick="app.navigate('inquiry')" class="text-stone-400 hover:text-stone-900 transition-colors" title="Inquire about this item">
+                                                &#9993; <!-- Unicode Envelope -->
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        ${products.length === 0 ? '<div class="text-center py-20 text-stone-500">No products found in this category.</div>' : ''}
+                    </div>
+                `;
+
+                container.innerHTML = headerHtml + controlsHtml + gridHtml;
+            },
+
+            // --- VIEW: Inquiry (Contact) ---
+            renderInquiry: function(container) {
+                const html = `
+                    <section class="min-h-[80vh] flex items-center justify-center bg-stone-50 py-12 px-4">
+                        <div class="max-w-2xl w-full bg-white p-8 md:p-12 rounded-xl shadow-sm border border-stone-100 text-center">
+                            <h2 class="text-3xl font-serif font-bold text-stone-900 mb-6">Start a Conversation</h2>
+                            <p class="text-stone-600 mb-10 leading-relaxed">
+                                Interested in a specific piece? Or perhaps you need a personal consultation? 
+                                We handle all requests personally. Choose your preferred method below.
+                            </p>
+                            
+                            <div class="grid gap-6 md:grid-cols-2">
+                                <a href="mailto:hello@jenndyco.com" class="flex flex-col items-center justify-center p-8 border-2 border-stone-100 rounded-lg hover:border-stone-900 hover:bg-stone-50 transition-all group">
+                                    <div class="text-4xl mb-4 text-stone-400 group-hover:text-stone-900 transition-colors">&#9993;</div> <!-- Unicode Email -->
+                                    <h3 class="font-bold text-stone-900 mb-2">Email Us</h3>
+                                    <p class="text-sm text-stone-500">For orders & detailed inquiries</p>
+                                </a>
+                                
+                                <a href="https://m.me/jenndyco" target="_blank" class="flex flex-col items-center justify-center p-8 border-2 border-stone-100 rounded-lg hover:border-[#0084FF] hover:bg-blue-50 transition-all group">
+                                    <div class="text-4xl mb-4 text-stone-400 group-hover:text-[#0084FF] transition-colors">&#10041;</div> <!-- Unicode Messenger-ish -->
+                                    <h3 class="font-bold text-stone-900 mb-2">Messenger</h3>
+                                    <p class="text-sm text-stone-500">For quick questions & chat</p>
+                                </a>
+                            </div>
+
+                            <div class="mt-12 pt-8 border-t border-stone-100">
+                                <p class="text-stone-400 text-sm">Response time: Usually within 24 hours.</p>
+                            </div>
+                        </div>
+                    </section>
+                `;
+                container.innerHTML = html;
+            },
+
+            // --- Interaction Helpers ---
+            filterProducts: function(category) {
+                this.state.filterCategory = category;
+                const container = document.getElementById('app-container');
+                // Re-render only the grid part would be efficient, but full re-render is safer for single-file simplicity
+                this.renderCollections(container);
+            },
+
+            // --- Chart.js Initialization ---
+            initCharts: function() {
+                // Satisfaction Doughnut Chart
+                const ctx1 = document.getElementById('satisfactionChart');
+                if (ctx1) {
+                    new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Okay (3★)', 'Good (4★)', 'Excellent (5★)'],
+                            datasets: [{
+                                data: brandData.stats.satisfaction,
+                                backgroundColor: ['#d6d3d1', '#a8a29e', '#1c1917'], // Stone shades
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false, // Critical for container scaling
+                            plugins: {
+                                legend: { position: 'bottom', labels: { font: { family: 'Lato' } } }
+                            }
+                        }
+                    });
+                }
+
+                // Materials Bar Chart
+                const ctx2 = document.getElementById('materialsChart');
+                if (ctx2) {
+                    new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Organic Cotton', 'Ethical Silk', 'Recycled'],
+                            datasets: [{
+                                label: 'Usage %',
+                                data: brandData.stats.materials,
+                                backgroundColor: '#57534e', // Stone-600
+                                borderRadius: 4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false, // Critical for container scaling
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: '#f5f5f4' } },
+                                x: { grid: { display: false } }
+                            },
+                            plugins: {
+                                legend: { display: false }
+                            }
+                        }
+                    });
+                }
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+        });
+
+    </script>
+</body>
+</html>
